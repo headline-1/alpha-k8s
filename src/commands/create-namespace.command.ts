@@ -1,9 +1,11 @@
 import * as k8s from '@kubernetes/client-node';
 import { Config } from '../../config';
-import { k8sApi } from '../../k8s';
 import { Module } from '../../module';
-import { mkdir } from '../../utility';
-import { createNamespaceBoundUser } from './create-user';
+import { mkdir } from '../utility';
+import { k8sApi } from '../utils/k8s.util';
+import { createNamespaceBoundUser } from './create-namespace-user.command';
+
+// @TODO convert to command
 
 export class CreateAppModule extends Module {
   constructor() {

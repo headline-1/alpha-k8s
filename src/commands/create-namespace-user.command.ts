@@ -1,10 +1,12 @@
 import { V1beta1PolicyRule } from '@kubernetes/client-node';
 import { STS } from 'aws-sdk';
 import * as YAML from 'js-yaml';
-import { iam } from '../../aws';
+import { iam } from '../utils/aws.util';
 import { Config } from '../../config';
-import { k8sApi, kc } from '../../k8s';
-import { run, writeFile } from '../../utility';
+import { k8sApi, kc } from '../utils/k8s.util';
+import { run, writeFile } from '../utility';
+
+// @TODO convert to command
 
 export const createNamespaceBoundUser = async (
   config: Config, namespaceName: string, suffix: string, rbacRules: Partial<V1beta1PolicyRule>[]

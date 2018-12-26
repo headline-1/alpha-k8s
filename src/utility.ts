@@ -26,22 +26,6 @@ export const createKeyPair = (path: string, name: string) => run(
   false
 );
 
-export const createCluster = (options: {
-  name: string;
-  region: string;
-  nodesMin: number;
-  nodesMax: number;
-  sshPublicKey: string;
-}) => run(`eksctl create cluster
-  --name=${options.name}
-  --region=${options.region}
-  --node-private-networking
-  --nodes-min=${options.nodesMin}
-  --nodes-max=${options.nodesMax}
-  --ssh-access
-  --ssh-public-key=${options.sshPublicKey}
-`.replace(/\n/g, ''));
-
 export const applyFile = (file: string) => run(`kubectl apply -f '${file}'`);
 export const applyFiles = async (files: string[]) => {
   for (const file of files) {
@@ -49,12 +33,12 @@ export const applyFiles = async (files: string[]) => {
   }
 };
 
-export const getSecret = async (name: string): Promise<any> => {
+export const getSecret = async (name: string) => {
   const secrets = await run(
     `kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep ${name} | awk '{print $1}')`,
     true
   );
-  const secretsObject = {};
+  const secretsObject: Record<string, string> = {};
   secrets.split('\n').forEach((line) => {
     const [key, value] = line.split(':').map(item => item.trim());
     secretsObject[key] = value;
