@@ -39,13 +39,15 @@
     underscore "^1.9.1"
     ws "^6.1.0"
 
-"@lpha/core@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@lpha/core/-/core-0.1.6.tgz#7d1ae2c67eae2fb1fbc8c0ad46e1745e07241d47"
-  integrity sha512-gWhVN9B4NdpVY0qhOl4Fxdg86eCtP4NSvog8wwsciHcaquWTsKj8GK58KcHXsMqRn+QsEcLyoyuLMGAUAVseWw==
+"@lpha/core@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@lpha/core/-/core-0.3.4.tgz#78907e31a167c9b9d5764f61c2f939ed850cdae1"
+  integrity sha512-hqWp2lrFxb775S8CsKBK1c/7NZ5bj1Rl+uA/2ag5O7PmrlK2wYQoyZJFoXOvHn17DSk897frVNFd4ptcBUJYFg==
   dependencies:
     chalk "^2.4.1"
     glob "^7.1.2"
+    io-ts "^1.5.1"
+    moment "^2.23.0"
     source-map-support "^0.5.6"
 
 "@types/js-yaml@^3.11.4":
@@ -476,6 +478,11 @@ form-data@~2.3.2:
     combined-stream "^1.0.6"
     mime-types "^2.1.12"
 
+fp-ts@^1.0.0:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.12.1.tgz#c3d032b7be009046a935991aaa21efaa14bf8d20"
+  integrity sha512-rNFziqhEwsAAXUrC6KkLwZwsiqswQFQ+7QeS3noSwTAOo6dPSJJ1S9yoHZ9ToRf+fpro9gbixWi9hkDHpb/9bg==
+
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
@@ -578,6 +585,13 @@ inversify@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/inversify/-/inversify-5.0.1.tgz#500d709b1434896ce5a0d58915c4a4210e34fb6e"
   integrity sha512-Ieh06s48WnEYGcqHepdsJUIJUXpwH5o5vodAX+DK2JA/gjy4EbEcQZxw+uFfzysmKjiLXGYwNG3qDZsKVMcINQ==
+
+io-ts@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.5.1.tgz#8824f6011ae5987d8bd601af05c4483d013f3044"
+  integrity sha512-2VvrD1xESb8vzZ1kz0fy3mYAALkeAfCLhc7JQKGGvgnxfYgimeodvqf2hEeFEf7ITDEhaGg37dRPsmcp9wliHQ==
+  dependencies:
+    fp-ts "^1.0.0"
 
 is-stream@^1.1.0:
   version "1.1.0"
@@ -730,6 +744,11 @@ minimatch@^3.0.4:
   integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
   dependencies:
     brace-expansion "^1.1.7"
+
+moment@^2.23.0:
+  version "2.23.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.23.0.tgz#759ea491ac97d54bac5ad776996e2a58cc1bc225"
+  integrity sha512-3IE39bHVqFbWWaPOMHZF98Q9c3LDKGTmypMiTM2QygGXXElkFWIH7GxfmlwmY2vwa+wmNsoYZmG2iusf1ZjJoA==
 
 nice-try@^1.0.4:
   version "1.0.5"

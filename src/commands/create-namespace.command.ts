@@ -1,25 +1,56 @@
 import * as k8s from '@kubernetes/client-node';
-import { Config } from '../../config';
-import { Module } from '../../module';
-import { mkdir } from '../utility';
+import { CommandBuilder, Logger, makeDirs, parameters, Types } from '@lpha/core';
 import { k8sApi } from '../utils/k8s.util';
-import { createNamespaceBoundUser } from './create-namespace-user.command';
+import { createNamespaceUser } from './create-namespace-user.command';
 
-// @TODO convert to command
+const TAG = 'create-namespace';
 
-export class CreateAppModule extends Module {
-  constructor() {
-    super('create-namespace');
-  }
-
-  async run(config: Config, [namespaceName]: string[]): Promise<void> {
+export const createNamespace = new CommandBuilder()
+  .name('create-namespace')
+  .parameters(
+    parameters()
+      .add('clusterName', {
+        type: Types.string,
+        required: true,
+        description: 'The name of K8S cluster',
+      })
+      .add('namespaceName', {
+        type: Types.string,
+        required: true,
+        description: 'The name of K8S cluster\'s namespace',
+      })
+      .add('suffix', {
+        type: Types.string,
+        required: true,
+        description: 'Part of all user name roles, policies and other resources' +
+          ' uniquely identifying user in the namespace.',
+      })
+      .add('region', {
+        type: Types.string,
+        required: true,
+        description: 'Cluster AWS region',
+      })
+      .add('rbacRules', {
+        type: Types.array(Types.partial({
+          apiGroups: Types.array(Types.string),
+          nonResourceURLs: Types.array(Types.string),
+          resourceNames: Types.array(Types.string),
+          resources: Types.array(Types.string),
+          verbs: Types.array(Types.string),
+        })),
+        required: true,
+        description: 'Role Based Access Control rules for the new role',
+      })
+      .build()
+  )
+  .execute(async ({ namespaceName, clusterName, region }) => {
     if (!namespaceName || !namespaceName.match(/^[a-z][a-z0-9\-]*$/i)) {
       throw new Error(`Namespace name is invalid: ${namespaceName}`);
     }
     const namespacePath = `./namespaces/${namespaceName}`;
-    await mkdir(namespacePath, { recursive: true });
+    await makeDirs(namespacePath);
 
-    console.log(`Creating namespace "${namespaceName}"...`);
+    Logger.log(TAG, `Creating namespace "${namespaceName}"...`);
     const namespace = {
       metadata: {
         name: namespaceName,
@@ -27,24 +58,42 @@ export class CreateAppModule extends Module {
     } as k8s.V1Namespace;
     await k8sApi.createNamespace(namespace);
 
-    await createNamespaceBoundUser(config, namespaceName, 'admin', [
-      {
-        apiGroups: ['', 'extensions', 'apps', 'persistentvolumeclaims', 'storage.k8s.io', 'autoscaling'],
-        resources: ['*'],
-        verbs: ['*'],
-      },
-      {
-        apiGroups: ['batch'],
-        resources: ['jobs', 'cronjobs'],
-        verbs: ['*'],
-      },
-    ]);
-    await createNamespaceBoundUser(config, namespaceName, 'deployments', [
-      {
-        apiGroups: ['extensions', 'apps'],
-        resources: ['deployments'],
-        verbs: ['*'],
-      },
-    ]);
-  }
-}
+    await createNamespaceUser.exec({
+      namespaceName,
+      clusterName,
+      region,
+      suffix: 'admin',
+      rbacRules: [
+        {
+          apiGroups: ['', 'extensions', 'apps', 'persistentvolumeclaims', 'storage.k8s.io', 'autoscaling'],
+          resources: ['*'],
+          verbs: ['*'],
+        },
+        {
+          apiGroups: ['batch'],
+          resources: ['jobs', 'cronjobs'],
+          verbs: ['*'],
+        },
+      ],
+    });
+
+    await createNamespaceUser.exec({
+      namespaceName,
+      clusterName,
+      region,
+      suffix: 'deployments',
+      rbacRules: [
+        {
+          apiGroups: ['extensions', 'apps'],
+          resources: ['deployments'],
+          verbs: ['*'],
+        },
+      ],
+    });
+
+    return {
+      result: undefined,
+      revert: async () => void 0,
+    };
+  })
+  .build();

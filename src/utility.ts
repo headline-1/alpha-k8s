@@ -1,42 +1,33 @@
-import { exec } from 'child_process';
+import { exec, readFile, remove, writeFile } from '@lpha/core';
 import * as fs from 'fs';
+import * as path from 'path';
 import { promisify } from 'util';
 
-export const writeFile = promisify(fs.writeFile);
-export const readFile = promisify(fs.readFile);
-export const mkdir = promisify(fs.mkdir);
+export const mkdtemp = promisify(fs.mkdtemp);
 
-export const run = (command: string, silent?: boolean): Promise<string> => new Promise<string>((resolve, reject) => {
-  const child = exec(command, { windowsHide: true });
-  let result = '';
-  child.stdout.on('data', chunk => result += chunk);
-  child.stderr.on('data', chunk => result += chunk);
-  if (!silent) {
-    child.stderr.pipe(process.stderr);
-    child.stdout.pipe(process.stdout);
-  }
-  child.on('exit', (code, signal) => code === 0
-    ? resolve(result.toString())
-    : reject(new Error(`${command} exited with code ${code}:${signal}\nLog:\n${result}`))
-  );
-});
-
-export const createKeyPair = (path: string, name: string) => run(
+export const createKeyPair = (path: string, name: string) => exec(
   `ssh-keygen -t rsa -b 4096 -C '${name}' -f '${path}'`,
-  false
+  { silent: false }
 );
 
-export const applyFile = (file: string) => run(`kubectl apply -f '${file}'`);
+export const apply = async (input: string) => {
+  const dir = await mkdtemp('apply');
+  const location = path.join(dir, 'apply.yaml');
+  await writeFile(location, input, 'utf8');
+  await exec(`kubectl apply -f '${location}'`, { silent: false });
+  await remove(dir);
+};
+
 export const applyFiles = async (files: string[]) => {
   for (const file of files) {
-    await applyFile(file);
+    await exec(`kubectl apply -f '${file}'`, { silent: false });
   }
 };
 
 export const getSecret = async (name: string) => {
-  const secrets = await run(
+  const secrets = await exec(
     `kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep ${name} | awk '{print $1}')`,
-    true
+    { silent: true }
   );
   const secretsObject: Record<string, string> = {};
   secrets.split('\n').forEach((line) => {
@@ -47,7 +38,7 @@ export const getSecret = async (name: string) => {
 };
 
 export const getDocument = async (sourcePath: string, values?: Record<string, string>) => {
-  let data = await readFile(sourcePath, { encoding: 'utf8' });
+  let data = await readFile(sourcePath, 'utf8');
   if (values) {
     Object.entries(values).forEach(([key, value]) => {
       data = data.replace(new RegExp(`\\\${${key}}`, 'g'), value);
