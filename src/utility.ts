@@ -1,21 +1,24 @@
-import { exec, readFile, remove, writeFile } from '@lpha/core';
-import * as fs from 'fs';
+import { exec, makeDir, readFile, remove, writeFile } from '@lpha/core';
+import * as crypto from 'crypto';
 import * as path from 'path';
-import { promisify } from 'util';
-
-export const mkdtemp = promisify(fs.mkdtemp);
 
 export const createKeyPair = (path: string, name: string) => exec(
   `ssh-keygen -t rsa -b 4096 -C '${name}' -f '${path}'`,
   { silent: false }
 );
 
+export const random = (length: number = 10) => crypto
+  .randomBytes(Math.ceil(length * 0.75))
+  .toString('base64')
+  .replace(/[^a-zA-Z0-9]/g, '');
+
 export const apply = async (input: string) => {
-  const dir = await mkdtemp('apply');
-  const location = path.join(dir, 'apply.yaml');
+  const dirName = path.resolve('apply-' + random());
+  await makeDir(dirName);
+  const location = path.join(dirName, 'apply.yaml');
   await writeFile(location, input, 'utf8');
   await exec(`kubectl apply -f '${location}'`, { silent: false });
-  await remove(dir);
+  await remove(dirName);
 };
 
 export const applyFiles = async (files: string[]) => {

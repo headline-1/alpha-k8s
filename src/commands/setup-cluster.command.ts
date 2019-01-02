@@ -54,7 +54,10 @@ export const setupCluster = new CommandBuilder()
       --nodes-max=${nodesMax}
       --ssh-access
       --ssh-public-key=${sshPublicKey}
-    `.replace(/\n/g, ''));
+    `.replace(/\n/g, ''), {
+      tag: 'eksctl-create-cluster',
+      silent: false,
+    });
 
     return {
       result: undefined,

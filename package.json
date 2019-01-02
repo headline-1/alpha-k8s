@@ -8,7 +8,9 @@
   "private": false,
   "scripts": {
     "clean": "rm -rf ./dist",
-    "build": "yarn clean && tsc",
+    "build:copy": "cpx 'src/**/*.yaml' dist",
+    "build:ts": "tsc",
+    "build": "yarn clean && yarn build:copy && yarn build:ts",
     "start": "node dist/index.js",
     "setup": "yarn start setup",
     "dashboard": "yarn start dashboard",
@@ -16,7 +18,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.7.2",
-    "@lpha/core": "^0.3.6",
+    "@lpha/core": "^0.3.10",
     "aws-sdk": "^2.382.0",
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.11"
@@ -27,6 +29,7 @@
     "@types/node": "^10.12.18",
     "@types/request": "^2.48.1",
     "@types/ws": "^6.0.1",
+    "cpx": "^1.5.0",
     "tslint": "^5.12.0",
     "tslint-config-airbnb-base": "^0.2.0",
     "typescript": "^3.2.2"
@@ -34,6 +37,10 @@
   "@": {
     "commands": [
       "./dist"
-    ]
+    ],
+    "setup-cluster": {
+      "name": "boldare",
+      "region": "eu-west-1"
+    }
   }
 }
