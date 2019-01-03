@@ -13,7 +13,7 @@ export const random = (length: number = 10) => crypto
   .replace(/[^a-zA-Z0-9]/g, '');
 
 export const apply = async (input: string) => {
-  const dirName = path.resolve('apply-' + random());
+  const dirName = path.resolve(`apply-${random()}`);
   await makeDir(dirName);
   const location = path.join(dirName, 'apply.yaml');
   await writeFile(location, input, 'utf8');
@@ -25,19 +25,6 @@ export const applyFiles = async (files: string[]) => {
   for (const file of files) {
     await exec(`kubectl apply -f '${file}'`, { silent: false });
   }
-};
-
-export const getSecret = async (name: string) => {
-  const secrets = await exec(
-    `kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep ${name} | awk '{print $1}')`,
-    { silent: true }
-  );
-  const secretsObject: Record<string, string> = {};
-  secrets.split('\n').forEach((line) => {
-    const [key, value] = line.split(':').map(item => item.trim());
-    secretsObject[key] = value;
-  });
-  return secretsObject;
 };
 
 export const getDocument = async (sourcePath: string, values?: Record<string, string>) => {

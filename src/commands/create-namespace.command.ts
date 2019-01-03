@@ -1,4 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
+import { V1DeleteOptions } from '@kubernetes/client-node';
 import { CommandBuilder, Logger, makeDirs, parameters, Types } from '@lpha/core';
 import { k8sApi } from '../utils/k8s.util';
 import { createNamespaceUser } from './create-namespace-user.command';
@@ -13,37 +14,23 @@ export const createNamespace = new CommandBuilder()
         type: Types.string,
         required: true,
         description: 'The name of K8S cluster',
+        cli: 'clusterName',
       })
       .add('namespaceName', {
         type: Types.string,
         required: true,
         description: 'The name of K8S cluster\'s namespace',
-      })
-      .add('suffix', {
-        type: Types.string,
-        required: true,
-        description: 'Part of all user name roles, policies and other resources' +
-          ' uniquely identifying user in the namespace.',
+        cli: 'namespaceName',
       })
       .add('region', {
         type: Types.string,
         required: true,
         description: 'Cluster AWS region',
-      })
-      .add('rbacRules', {
-        type: Types.array(Types.partial({
-          apiGroups: Types.array(Types.string),
-          nonResourceURLs: Types.array(Types.string),
-          resourceNames: Types.array(Types.string),
-          resources: Types.array(Types.string),
-          verbs: Types.array(Types.string),
-        })),
-        required: true,
-        description: 'Role Based Access Control rules for the new role',
+        cli: 'region',
       })
       .build()
   )
-  .execute(async ({ namespaceName, clusterName, region }) => {
+  .execute(async ({ namespaceName, clusterName, region }, revertStack) => {
     if (!namespaceName || !namespaceName.match(/^[a-z][a-z0-9\-]*$/i)) {
       throw new Error(`Namespace name is invalid: ${namespaceName}`);
     }
@@ -57,6 +44,12 @@ export const createNamespace = new CommandBuilder()
       },
     } as k8s.V1Namespace;
     await k8sApi.createNamespace(namespace);
+    revertStack.add(async () => {
+      Logger.log(TAG, `Deleting namespace "${namespaceName}"...`);
+      await k8sApi.deleteNamespace(namespaceName, {
+        propagationPolicy: 'Foreground',
+      } as V1DeleteOptions);
+    });
 
     await createNamespaceUser.exec({
       namespaceName,
@@ -75,7 +68,7 @@ export const createNamespace = new CommandBuilder()
           verbs: ['*'],
         },
       ],
-    });
+    }, revertStack);
 
     await createNamespaceUser.exec({
       namespaceName,
@@ -89,11 +82,6 @@ export const createNamespace = new CommandBuilder()
           verbs: ['*'],
         },
       ],
-    });
-
-    return {
-      result: undefined,
-      revert: async () => void 0,
-    };
+    }, revertStack);
   })
   .build();

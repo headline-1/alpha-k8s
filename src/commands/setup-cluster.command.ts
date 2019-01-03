@@ -22,7 +22,7 @@ export const setupCluster = new CommandBuilder()
       .add('nodesMin', {
         type: Types.number,
         description: 'The minimal number of nodes present in the cluster.',
-        default: 2,
+        default: 1,
         cli: 'nodesMin',
         required: true,
       })

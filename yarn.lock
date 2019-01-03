@@ -39,10 +39,10 @@
     underscore "^1.9.1"
     ws "^6.1.0"
 
-"@lpha/core@^0.3.10":
-  version "0.3.10"
-  resolved "https://registry.yarnpkg.com/@lpha/core/-/core-0.3.10.tgz#1c21f03a3ffc05f224b6a26c4ee685f886d1c762"
-  integrity sha512-z7CoSWkMfDYWJyII6KUpjG8f8RcvArMd/3uuR2aV1/LXp6+DS8WMAVlbF21haV4/QFoOXbB1PZNy15htfVmyJg==
+"@lpha/core@^0.3.16":
+  version "0.3.16"
+  resolved "https://registry.yarnpkg.com/@lpha/core/-/core-0.3.16.tgz#370c6f01dd8c5ccd68013ec8fbd03d9629c31588"
+  integrity sha512-1jIVJsnIlWUCxMfxKC8SeKJnZdVow4qaN6Wj+8N5gPe6G0o63ElRXwk453ukcN4QHy3muxELX1tfpG7ngwaWzg==
   dependencies:
     chalk "^2.4.1"
     glob "^7.1.2"
