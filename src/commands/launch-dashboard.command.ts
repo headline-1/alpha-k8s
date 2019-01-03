@@ -20,7 +20,7 @@ export const launchDashboard = new CommandBuilder()
   .execute(async ({ username }) => {
     let token = kc.getCurrentUser().token;
     if (!token) {
-      const { body: { items } } = await k8sApi.listNamespacedSecret('kube-system');
+      const { body: { items } } = await k8sApi().listNamespacedSecret('kube-system');
       const item = items.find(item => item.metadata.name.includes(username + '-token-'));
       if (!item) {
         throw new Error(`Could not find token for username "${username}".`);

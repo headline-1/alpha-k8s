@@ -48,5 +48,5 @@ export const initKubeConfig = () => {
 
 initKubeConfig();
 
-export const k8sApi = kc.makeApiClient(k8s.Core_v1Api);
-export const k8sRbacApi = kc.makeApiClient(k8s.RbacAuthorization_v1beta1Api);
+export const k8sApi = () => kc.makeApiClient(k8s.Core_v1Api);
+export const k8sRbacApi = () => kc.makeApiClient(k8s.RbacAuthorization_v1beta1Api);

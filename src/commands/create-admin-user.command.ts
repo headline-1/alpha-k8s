@@ -73,7 +73,7 @@ export const createAdminUser = new CommandBuilder()
     Logger.log(`${name}|AWS`, `Created policy "${policyName}". ARN: ${policyArn}`);
 
     Logger.log(`${name}|K8S`, `Reading AWS Auth configuration and updating "mapRoles" property...`);
-    const authConfigMap = (await k8sApi.readNamespacedConfigMap('aws-auth', 'kube-system')).body;
+    const authConfigMap = (await k8sApi().readNamespacedConfigMap('aws-auth', 'kube-system')).body;
     const roles = YAML.load(authConfigMap.data.mapRoles);
     roles.push({
       groups: ['system:masters'],
@@ -81,7 +81,7 @@ export const createAdminUser = new CommandBuilder()
       username: roleName,
     });
     authConfigMap.data.mapRoles = YAML.dump(roles);
-    await k8sApi.replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
+    await k8sApi().replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
 
     Logger.log(`${name}|AWS`, `Attaching admin policy to current user`);
     const { User: { UserName: currentUserName } } = await iam.getUser({}).promise();

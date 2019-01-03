@@ -43,10 +43,10 @@ export const createNamespace = new CommandBuilder()
         name: namespaceName,
       },
     } as k8s.V1Namespace;
-    await k8sApi.createNamespace(namespace);
+    await k8sApi().createNamespace(namespace);
     revertStack.add(async () => {
       Logger.log(TAG, `Deleting namespace "${namespaceName}"...`);
-      await k8sApi.deleteNamespace(namespaceName, {
+      await k8sApi().deleteNamespace(namespaceName, {
         propagationPolicy: 'Foreground',
       } as V1DeleteOptions);
     });

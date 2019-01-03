@@ -65,7 +65,7 @@ export const createNamespaceUser = new CommandBuilder()
     const { Account: accountId } = await sts.getCallerIdentity().promise();
 
     Logger.log(`${name}|K8S`, `Creating namespaced role "${kubernetesRoleName}" for namespace "${namespaceName}"...`);
-    await k8sRbacApi.createNamespacedRole(namespaceName, {
+    await k8sRbacApi().createNamespacedRole(namespaceName, {
       kind: 'Role',
       apiVersion: 'rbac.authorization.k8s.io/v1beta1',
       metadata: {
@@ -79,7 +79,7 @@ export const createNamespaceUser = new CommandBuilder()
         `${name}|K8S`,
         `Deleting namespaced role "${kubernetesRoleName}" for namespace "${namespaceName}"...`
       );
-      await k8sRbacApi.deleteNamespacedRole(kubernetesRoleName, namespaceName, {
+      await k8sRbacApi().deleteNamespacedRole(kubernetesRoleName, namespaceName, {
         propagationPolicy: 'Foreground',
       } as V1DeleteOptions);
     });
@@ -88,7 +88,7 @@ export const createNamespaceUser = new CommandBuilder()
       `${name}|K8S`,
       `Creating namespaced role binding "${kubernetesRoleBindingName}" for namespace "${namespaceName}"...`
     );
-    await k8sRbacApi.createNamespacedRoleBinding(namespaceName, {
+    await k8sRbacApi().createNamespacedRoleBinding(namespaceName, {
       kind: 'RoleBinding',
       apiVersion: 'rbac.authorization.k8s.io/v1beta1',
       metadata: {
@@ -113,7 +113,7 @@ export const createNamespaceUser = new CommandBuilder()
         `${name}|K8S`,
         `Deleting namespaced role binding "${kubernetesRoleBindingName}" for namespace "${namespaceName}"...`
       );
-      await k8sRbacApi.deleteNamespacedRoleBinding(kubernetesRoleBindingName, namespaceName, {
+      await k8sRbacApi().deleteNamespacedRoleBinding(kubernetesRoleBindingName, namespaceName, {
         propagationPolicy: 'Foreground',
       } as V1DeleteOptions);
     });
@@ -218,7 +218,7 @@ export const createNamespaceUser = new CommandBuilder()
     });
 
     Logger.log(`${name}|K8S`, `Reading AWS Auth configuration and updating "mapRoles" property...`);
-    const authConfigMap = (await k8sApi.readNamespacedConfigMap('aws-auth', 'kube-system')).body;
+    const authConfigMap = (await k8sApi().readNamespacedConfigMap('aws-auth', 'kube-system')).body;
     const roles = YAML.load(authConfigMap.data.mapRoles);
     roles.push({
       groups: [kubernetesGroupName],
@@ -226,14 +226,14 @@ export const createNamespaceUser = new CommandBuilder()
       username: kubernetesName,
     });
     authConfigMap.data.mapRoles = YAML.dump(roles);
-    await k8sApi.replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
+    await k8sApi().replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
 
     revertStack.add(async () => {
-      const authConfigMap = (await k8sApi.readNamespacedConfigMap('aws-auth', 'kube-system')).body;
+      const authConfigMap = (await k8sApi().readNamespacedConfigMap('aws-auth', 'kube-system')).body;
       const roles = YAML.load(authConfigMap.data.mapRoles)
         .filter((role: any) => role.rolearn !== roleArn);
       authConfigMap.data.mapRoles = YAML.dump(roles);
-      await k8sApi.replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
+      await k8sApi().replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
     });
 
     Logger.log(`${name}|K8S`, `Saving ${suffix} yaml and base64-encoded configurations.`);
