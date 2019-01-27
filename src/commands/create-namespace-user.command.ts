@@ -1,17 +1,17 @@
 import { V1beta1Role, V1beta1RoleBinding, V1DeleteOptions } from '@kubernetes/client-node';
-import { CommandBuilder, Logger, parameters, Types, writeFile } from '@lpha/core';
+import { CommandBuilder, Logger, parameters, remove, Types, writeFile } from '@lpha/core';
 import * as YAML from 'js-yaml';
 import { iam, sts } from '../utils/aws.util';
-import { k8sApi, k8sRbacApi, kc } from '../utils/k8s.util';
+import { k8sApi, k8sRbacApi } from '../utils/k8s.util';
 
 const TAG = 'CreateNamespaceUser';
 
 export const createNamespaceUser = new CommandBuilder()
   .name('create-namespace-user')
   .description(
-    'Creates a new user, role and policy in specified cluster\'s namespace. ' +
-    'After completion, you will be able to access cluster in namespace\'s scope using AWS IAM Authernticator. ' +
-    'New AWS credentials and Kubeconfig file will be generated automatically.'
+    'Creates a new IAM group and user, role and policy in specified cluster\'s namespace. ' +
+    'After completion, you will be able to access cluster in namespace\'s scope using AWS IAM Authenticator. ' +
+    'New AWS credentials will be generated automatically.'
   )
   .parameters(
     parameters()
@@ -31,10 +31,11 @@ export const createNamespaceUser = new CommandBuilder()
         description: 'Part of all user name roles, policies and other resources' +
           ' uniquely identifying user in the namespace.',
       })
-      .add('region', {
-        type: Types.string,
-        required: true,
-        description: 'Cluster AWS region',
+      .add('addDefaultUser', {
+        type: Types.boolean,
+        required: false,
+        default: false,
+        description: '"true" if you want to add default IAM user to the group',
       })
       .add('rbacRules', {
         type: Types.array(Types.partial({
@@ -49,9 +50,10 @@ export const createNamespaceUser = new CommandBuilder()
       })
       .build()
   )
-  .execute(async ({ clusterName, namespaceName, suffix, region, rbacRules }, revertStack) => {
+  .execute(async ({ clusterName, namespaceName, suffix, rbacRules, addDefaultUser }, revertStack) => {
     const kubernetesName = `${namespaceName}-${suffix}`;
     const name = `${kubernetesName}-${clusterName}`;
+    const groupName = `${name}-k8s-group`;
     const userName = `${name}-k8s-user`;
     const kubernetesGroupName = `${kubernetesName}-group`;
     const kubernetesRoleName = `${kubernetesName}-role`;
@@ -169,35 +171,36 @@ export const createNamespaceUser = new CommandBuilder()
       }).promise();
     });
 
-    Logger.log(`${name}|AWS`, `Creating user "${userName}"...`);
-    const { User: { Arn: userArn } = { Arn: undefined } } = await iam.createUser({
-      UserName: userName,
+    Logger.log(`${name}|AWS`, `Creating group "${groupName}"...`);
+    const { Group: { Arn: groupArn } = { Arn: undefined } } = await iam.createGroup({
+      GroupName: groupName,
     }).promise();
 
-    if (!userArn) {
+    if (!groupArn) {
       throw new Error('"userArn" is missing');
     }
 
     revertStack.add(async () => {
-      Logger.log(`${name}|AWS`, `Deleting user "${userName}"...`);
-      await iam.deleteUser({
-        UserName: userName,
+      Logger.log(`${name}|AWS`, `Deleting group "${groupName}"...`);
+      await iam.deleteGroup({
+        GroupName: groupName,
       }).promise();
     });
 
-    Logger.log(`${name}|AWS`, `Attaching policy "${policyArn}" to the user "${userName}"...`);
-    await iam.attachUserPolicy({
-      UserName: userName,
+    Logger.log(`${name}|AWS`, `Attaching policy "${policyArn}" to the group "${groupName}"...`);
+    await iam.attachGroupPolicy({
+      GroupName: groupName,
       PolicyArn: policyArn,
     }).promise();
     revertStack.add(async () => {
-      await iam.detachUserPolicy({
-        UserName: userName,
+      Logger.log(`${name}|AWS`, `Detaching policy "${policyArn}" from the group "${groupName}"...`);
+      await iam.detachGroupPolicy({
+        GroupName: groupName,
         PolicyArn: policyArn,
       }).promise();
     });
 
-    Logger.log(`${name}|AWS`, `Allowing user "${userArn}" to access role ${roleName}...`);
+    Logger.log(`${name}|AWS`, `Allowing group "${groupArn}" to access role ${roleName}...`);
     const { Role: { AssumeRolePolicyDocument: assumeRolePolicy = undefined } = {} } = await iam.getRole({
       RoleName: roleName,
     }).promise();
@@ -211,10 +214,18 @@ export const createNamespaceUser = new CommandBuilder()
     if (typeof principal.AWS === 'string') {
       principal.AWS = [principal.AWS];
     }
-    principal.AWS.push(userArn);
+    principal.AWS.push(groupArn);
     await iam.updateAssumeRolePolicy({
       RoleName: roleName,
       PolicyDocument: JSON.stringify(assumeRolePolicyObject),
+    });
+    revertStack.add(async () => {
+      Logger.log(`${name}|AWS`, `Denying group "${groupArn}" to access role ${roleName}` +
+        ` (reverting to previous state)...`);
+      await iam.updateAssumeRolePolicy({
+        RoleName: roleName,
+        PolicyDocument: decodeURIComponent(assumeRolePolicy),
+      });
     });
 
     Logger.log(`${name}|K8S`, `Reading AWS Auth configuration and updating "mapRoles" property...`);
@@ -236,73 +247,63 @@ export const createNamespaceUser = new CommandBuilder()
       await k8sApi().replaceNamespacedConfigMap('aws-auth', 'kube-system', authConfigMap);
     });
 
-    Logger.log(`${name}|K8S`, `Saving ${suffix} yaml and base64-encoded configurations.`);
-    const clusterItem = kc.clusters.find(c => c.name.startsWith(`${clusterName}.${region}`));
-    if (!clusterItem) {
-      throw new Error(`Could not find a cluster starting with "${clusterName}.${region}"`);
+    if (addDefaultUser) {
+      const { User: { Arn: userArn } = { Arn: undefined } } = await iam.createUser({
+        UserName: userName,
+      }).promise();
+      if (!userArn) {
+        throw new Error('User ARN is not defined.');
+      }
+      revertStack.add(async () => {
+        await iam.deleteUser({
+          UserName: userName,
+        }).promise();
+      });
+
+      Logger.log(`${name}|AWS`, `Adding default user "${userName}" to "${groupName}" group.`);
+      await iam.addUserToGroup({
+        GroupName: groupName,
+        UserName: userName,
+      }).promise();
+      revertStack.add(async () => {
+        Logger.log(`${name}|AWS`, `Removing default user "${userName}" from "${groupName}" group.`);
+        await iam.removeUserFromGroup({
+          GroupName: groupName,
+          UserName: userName,
+        }).promise();
+      });
+
+      Logger.log(`${name}|AWS`, `Creating access keys for ${suffix} the user "${userName}".`);
+      const { AccessKey } = await iam.createAccessKey({
+        UserName: userName,
+      }).promise();
+      revertStack.add(async () => {
+        Logger.log(`${name}|AWS`, `Deleting access keys for ${suffix} the user "${userName}".`);
+        await iam.deleteAccessKey({
+          AccessKeyId: AccessKey.AccessKeyId,
+          UserName: AccessKey.UserName,
+        }).promise();
+      });
+
+      const accessKeysLocation = `./namespaces/${namespaceName}/${userName}.keys.json`;
+      Logger.log(`${name}|AWS`, `Saving access keys to "${accessKeysLocation}"...`);
+      await writeFile(
+        accessKeysLocation,
+        JSON.stringify(AccessKey, null, 2)
+      );
+      revertStack.add(async () => {
+        Logger.log(`${name}|AWS`, `Removing access keys file "${accessKeysLocation}"...`);
+        try {
+          await remove(accessKeysLocation);
+        } catch {
+          Logger.log(`${name}|AWS`, `Failed to remove access keys file "${accessKeysLocation}"; reverting anyway...`);
+        }
+      });
+    } else {
+      Logger.log(`${name}|AWS`, `Skipping creation of a default user.`);
     }
 
-    const userConfig = YAML.dump({
-      apiVersion: 'v1',
-      kind: 'Config',
-      preferences: {},
-      clusters: [
-        {
-          name: clusterItem.name,
-          cluster: {
-            'certificate-authority-data': clusterItem.caData,
-            server: clusterItem.server,
-          },
-        },
-      ],
-      users: [
-        {
-          name: userName,
-          user: {
-            exec: {
-              apiVersion: 'client.authentication.k8s.io/v1alpha1',
-              args: [
-                'token',
-                '-i', clusterName,
-                '-r', roleArn,
-              ],
-              command: 'aws-iam-authenticator',
-              env: null,
-            },
-          },
-        },
-      ],
-      contexts: [
-        {
-          context: {
-            cluster: clusterItem.name,
-            namespace: namespaceName,
-            user: userName,
-          },
-          name: kubernetesName,
-        },
-      ],
-      'current-context': kubernetesName,
-    });
-
-    await writeFile(
-      `./namespaces/${namespaceName}/${suffix}.config.yaml`,
-      userConfig
-    );
-    await writeFile(
-      `./namespaces/${namespaceName}/${suffix}.config.base64.txt`,
-      Buffer.from(userConfig).toString('base64')
-    );
-
-    Logger.log(`${name}|AWS`, `Creating access keys for ${suffix} user.`);
-    const { AccessKey } = await iam.createAccessKey({
-      UserName: userName,
-    }).promise();
-    await writeFile(
-      `./namespaces/${namespaceName}/${suffix}.keys.json`,
-      JSON.stringify(AccessKey, null, 2)
-    );
-    Logger.log(TAG, `${name}: Done!`);
-    return userArn;
+    Logger.log(TAG, `${name}: Done: "${groupArn}" group has access to namespace as "${suffix}".`);
+    return groupArn;
   })
   .build();
