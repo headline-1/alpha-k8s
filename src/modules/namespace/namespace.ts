@@ -27,7 +27,7 @@ export class CreateAppModule extends Module {
 
     await createNamespaceBoundUser(config, namespaceName, 'admin', [
       {
-        apiGroups: ['', 'extensions', 'apps'],
+        apiGroups: ['', 'extensions', 'apps', 'persistentvolumeclaims', 'storage.k8s.io', 'autoscaling'],
         resources: ['*'],
         verbs: ['*'],
       },
