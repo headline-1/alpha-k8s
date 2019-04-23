@@ -1,0 +1,617 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "1eb59004-0bbc-471a-ac35-a31ac41bc383": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 190,
+          "y": 180
+        },
+        "z": 0,
+        "embeds": [],
+        "dependson": [
+          "8df62351-6928-49d2-a120-6eb1f15ddad9"
+        ]
+      },
+      "e2cc8bd4-b432-4cf7-b579-ca1268630e33": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 190,
+          "y": 80
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "8df62351-6928-49d2-a120-6eb1f15ddad9": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 310,
+          "y": 180
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "38c5a3e9-d333-4647-98aa-945004f53a96": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": 10
+        },
+        "z": 0,
+        "embeds": [],
+        "isassociatedwith": [
+          "e2cc8bd4-b432-4cf7-b579-ca1268630e33",
+          "8df62351-6928-49d2-a120-6eb1f15ddad9",
+          "d2e351a5-68b6-4b4b-a7b9-aa502f184a65",
+          "58ed8944-c93f-4f86-8774-6d690f97cb3a"
+        ]
+      },
+      "d2e351a5-68b6-4b4b-a7b9-aa502f184a65": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 470,
+          "y": 180
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "58ed8944-c93f-4f86-8774-6d690f97cb3a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 610,
+          "y": 80
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "862f00e4-d4d6-4cfe-b08e-214b7a0cc32f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 610,
+          "y": 180
+        },
+        "z": 0,
+        "embeds": [],
+        "isassociatedwith": [
+          "d2e351a5-68b6-4b4b-a7b9-aa502f184a65"
+        ]
+      },
+      "08097016-0902-493c-8285-8e87184b19ad": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 470,
+          "y": 280
+        },
+        "z": 0,
+        "embeds": [],
+        "isassociatedwith": [
+          "d2e351a5-68b6-4b4b-a7b9-aa502f184a65"
+        ]
+      },
+      "9b8fd600-a12d-43d9-a3f6-b51009e710b9": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 610,
+          "y": 280
+        },
+        "z": 0,
+        "embeds": [],
+        "dependson": [
+          "08097016-0902-493c-8285-8e87184b19ad"
+        ]
+      },
+      "b17ed4d5-8678-48dc-abbe-f4d66471eab6": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": -70
+        },
+        "z": 0,
+        "embeds": [],
+        "isassociatedwith": [
+          "8df62351-6928-49d2-a120-6eb1f15ddad9",
+          "e2cc8bd4-b432-4cf7-b579-ca1268630e33"
+        ]
+      }
+    }
+  },
+  "Resources": {
+    "AdminKubernetesRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-admin-role"
+            ]
+          ]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {}
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "e2cc8bd4-b432-4cf7-b579-ca1268630e33"
+        }
+      },
+      "DeletionPolicy": "Delete"
+    },
+    "AdminPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-admin-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AssumeNamespaceRole",
+              "Effect": "Allow",
+              "Action": "sts:AssumeRole",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "AdminKubernetesRole",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Groups": [
+          {
+            "Ref": "AdminGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "1eb59004-0bbc-471a-ac35-a31ac41bc383"
+        }
+      },
+      "DependsOn": [
+        "AdminGroup"
+      ]
+    },
+    "AdminGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-admin-group"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "8df62351-6928-49d2-a120-6eb1f15ddad9"
+        }
+      }
+    },
+    "BasicAccessPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-basic-access-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "S3Info",
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListAllMyBuckets"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "ClusterInfo",
+              "Effect": "Allow",
+              "Action": [
+                "eks:DescribeCluster",
+                "eks:ListClusters"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "RepositoryInfo",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:DescribeRepositories"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "RepositoryAllAccess",
+              "Effect": "Allow",
+              "Action": "ecr:*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ecr:::repository/",
+                    {
+                      "Ref": "NamespaceName"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "AdminKubernetesRole"
+          },
+          {
+            "Ref": "DeploymentsKubernetesRole"
+          }
+        ],
+        "Groups": [
+          {
+            "Ref": "AdminGroup"
+          },
+          {
+            "Ref": "DeploymentGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "38c5a3e9-d333-4647-98aa-945004f53a96"
+        }
+      }
+    },
+    "DeploymentGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-deployments-group"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "d2e351a5-68b6-4b4b-a7b9-aa502f184a65"
+        }
+      }
+    },
+    "DeploymentsKubernetesRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-deployments-role"
+            ]
+          ]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {}
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "58ed8944-c93f-4f86-8774-6d690f97cb3a"
+        }
+      }
+    },
+    "DeploymentsPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-deployments-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AssumeNamespaceRole",
+              "Effect": "Allow",
+              "Action": "sts:AssumeRole",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DeploymentsKubernetesRole",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Groups": [
+          {
+            "Ref": "DeploymentGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "862f00e4-d4d6-4cfe-b08e-214b7a0cc32f"
+        }
+      }
+    },
+    "DeploymentsUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "UserName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-deployments-user"
+            ]
+          ]
+        },
+        "Groups": [
+          {
+            "Ref": "DeploymentGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "08097016-0902-493c-8285-8e87184b19ad"
+        }
+      }
+    },
+    "DeploymentsAccessKeys": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-deployments-user"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9b8fd600-a12d-43d9-a3f6-b51009e710b9"
+        }
+      },
+      "DependsOn": [
+        "DeploymentsUser"
+      ]
+    },
+    "S3FullAccessPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "NamespaceName"
+              },
+              "-s3-bucket-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "FullBucketAccess",
+              "Effect": "Allow",
+              "Action": [
+                "*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "NamespaceName"
+                      },
+                      "-*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "NamespaceName"
+                      },
+                      "-*/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "AdminKubernetesRole"
+          }
+        ],
+        "Groups": [
+          {
+            "Ref": "AdminGroup"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "b17ed4d5-8678-48dc-abbe-f4d66471eab6"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "NamespaceName": {
+      "Type": "String",
+      "Description": "Namespace name."
+    }
+  },
+  "Outputs": {
+    "DeploymentUserAccessKeyId": {
+      "Description": "AWS AccessKeyId for deployments (for CI jobs, i.e. Travis)",
+      "Value": {
+        "Ref": "DeploymentsAccessKeys"
+      }
+    },
+    "DeploymentUserSecretAccessKey": {
+      "Description": "AWS SecretAccessKey for deployments (for CI jobs, i.e. Travis)",
+      "Value": {
+        "Fn::GetAtt": [
+          "DeploymentsAccessKeys",
+          "SecretAccessKey"
+        ]
+      }
+    },
+    "AdminKubernetesRole": {
+      "Description": "Role that is used by namespace admins to operate on Kubernetes cluster",
+      "Value": {
+        "Fn::GetAtt": [
+          "AdminKubernetesRole",
+          "Arn"
+        ]
+      }
+    },
+    "DeploymentsKubernetesRole": {
+      "Description": "Role that is used by namespace deployments user to operate on Kubernetes cluster",
+      "Value": {
+        "Fn::GetAtt": [
+          "DeploymentsKubernetesRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}
