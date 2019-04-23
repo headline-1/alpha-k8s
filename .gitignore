@@ -2,3 +2,4 @@
 *.filled.yaml
 /kube.json
 /namespaces
+/dist

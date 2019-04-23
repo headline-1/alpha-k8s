@@ -1,29 +1,42 @@
 {
-  "name": "alpha-k8s",
+  "name": "@lpha/aws-k8s",
   "version": "1.0.0",
-  "description": "Set up a cluster easily",
-  "main": "src/index.ts",
+  "description": "Set up a Kubernetes cluster on AWS easily",
+  "main": "dist/index.js",
   "author": "Krzysztof Miemiec <krzysztof.miemiec@gmail.com>",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "clean": "rm -rf ./dist",
+    "build:copy": "cpx 'src/**/*.{yaml,json}' dist",
+    "build:ts": "tsc",
+    "build": "yarn clean && yarn build:copy && yarn build:ts",
+    "start": "node dist/index.js",
     "setup": "yarn start setup",
     "dashboard": "yarn start dashboard",
     "create-namespace": "yarn start create-namespace"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.7.2",
-    "@lpha/core": "^0.1.0",
-    "@types/js-yaml": "^3.11.4",
-    "@types/lodash": "^4.14.119",
-    "@types/node": "^10.12.18",
-    "aws-sdk": "^2.382.0",
-    "js-yaml": "^3.12.0",
-    "lodash": "^4.17.11",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.12.0",
-    "tslint-config-airbnb-base": "^0.2.0",
-    "typescript": "^3.2.2"
+    "@lpha/core": "^0.3.16",
+    "aws-sdk": "^2.441.0",
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.123",
+    "@types/node": "^11.13.7",
+    "@types/request": "^2.48.1",
+    "@types/ws": "^6.0.1",
+    "cpx": "^1.5.0",
+    "tslint": "^5.16.0",
+    "tslint-config-airbnb-base": "^0.3.0",
+    "typescript": "^3.4.4"
+  },
+  "@": {
+    "commands": [
+      "./dist"
+    ]
   }
 }

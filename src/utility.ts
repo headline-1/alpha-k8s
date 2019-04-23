@@ -1,69 +1,34 @@
-import { exec } from 'child_process';
-import * as fs from 'fs';
-import { promisify } from 'util';
+import { exec, makeDir, readFile, remove, writeFile } from '@lpha/core';
+import * as crypto from 'crypto';
+import * as path from 'path';
 
-export const writeFile = promisify(fs.writeFile);
-export const readFile = promisify(fs.readFile);
-export const mkdir = promisify(fs.mkdir);
-
-export const run = (command: string, silent?: boolean): Promise<string> => new Promise<string>((resolve, reject) => {
-  const child = exec(command, { windowsHide: true });
-  let result = '';
-  child.stdout.on('data', chunk => result += chunk);
-  child.stderr.on('data', chunk => result += chunk);
-  if (!silent) {
-    child.stderr.pipe(process.stderr);
-    child.stdout.pipe(process.stdout);
-  }
-  child.on('exit', (code, signal) => code === 0
-    ? resolve(result.toString())
-    : reject(new Error(`${command} exited with code ${code}:${signal}\nLog:\n${result}`))
-  );
-});
-
-export const createKeyPair = (path: string, name: string) => run(
+export const createKeyPair = (path: string, name: string) => exec(
   `ssh-keygen -t rsa -b 4096 -C '${name}' -f '${path}'`,
-  false
+  { silent: false }
 );
 
-export const createCluster = (options: {
-  name: string;
-  region: string;
-  nodesMin: number;
-  nodesMax: number;
-  sshPublicKey: string;
-}) => run(`eksctl create cluster
-  --name=${options.name}
-  --region=${options.region}
-  --node-private-networking
-  --nodes-min=${options.nodesMin}
-  --nodes-max=${options.nodesMax}
-  --ssh-access
-  --ssh-public-key=${options.sshPublicKey}
-`.replace(/\n/g, ''));
+export const random = (length: number = 10) => crypto
+  .randomBytes(Math.ceil(length * 0.75))
+  .toString('base64')
+  .replace(/[^a-zA-Z0-9]/g, '');
 
-export const applyFile = (file: string) => run(`kubectl apply -f '${file}'`);
-export const applyFiles = async (files: string[]) => {
-  for (const file of files) {
-    await applyFile(file);
-  }
+export const apply = async (input: string) => {
+  const dirName = path.resolve(`apply-${random()}`);
+  await makeDir(dirName);
+  const location = path.join(dirName, 'apply.yaml');
+  await writeFile(location, input, 'utf8');
+  await exec(`kubectl apply -f '${location}'`, { silent: false });
+  await remove(dirName);
 };
 
-export const getSecret = async (name: string): Promise<any> => {
-  const secrets = await run(
-    `kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep ${name} | awk '{print $1}')`,
-    true
-  );
-  const secretsObject = {};
-  secrets.split('\n').forEach((line) => {
-    const [key, value] = line.split(':').map(item => item.trim());
-    secretsObject[key] = value;
-  });
-  return secretsObject;
+export const applyFiles = async (files: string[]) => {
+  for (const file of files) {
+    await exec(`kubectl apply -f '${file}'`, { silent: false });
+  }
 };
 
 export const getDocument = async (sourcePath: string, values?: Record<string, string>) => {
-  let data = await readFile(sourcePath, { encoding: 'utf8' });
+  let data = await readFile(sourcePath, 'utf8');
   if (values) {
     Object.entries(values).forEach(([key, value]) => {
       data = data.replace(new RegExp(`\\\${${key}}`, 'g'), value);
