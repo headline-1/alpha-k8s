@@ -1,4 +1,4 @@
-import { CommandBuilder, Logger, parameters, readFile, Types } from '@lpha/core';
+import { CommandBuilder, Logger, ParametersBuilder, readFile, Types } from '@lpha/core';
 import * as path from 'path';
 import { apply } from '../../utility';
 import { iam } from '../../utils/aws.util';
@@ -9,7 +9,7 @@ export const installAutoscaler = new CommandBuilder()
   .name('install-autoscaler')
   .description('Configures Autoscaler for AWS K8S cluster')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('name', {
         type: Types.string,
         required: true,

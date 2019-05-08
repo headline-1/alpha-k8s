@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.7.2",
-    "@lpha/core": "^0.3.16",
+    "@lpha/core": "^0.4.5",
     "aws-sdk": "^2.441.0",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.11"

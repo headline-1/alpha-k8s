@@ -1,4 +1,4 @@
-import { CommandBuilder, exec, Logger, parameters, Types } from '@lpha/core';
+import { CommandBuilder, exec, Logger, ParametersBuilder, Types } from '@lpha/core';
 import { k8sApi, kc } from '../utils/k8s.util';
 
 const TAG = 'launch-dashboard';
@@ -7,7 +7,7 @@ export const launchDashboard = new CommandBuilder()
   .name('launch-dashboard')
   .description('Allows dashboard access through a local kubectl proxy')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('username', {
         type: Types.string,
         required: true,

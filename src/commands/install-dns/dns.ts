@@ -1,4 +1,4 @@
-import { CommandBuilder, Logger, parameters, Types } from '@lpha/core';
+import { CommandBuilder, Logger, ParametersBuilder, Types } from '@lpha/core';
 import * as path from 'path';
 import { apply, getDocument } from '../../utility';
 import { iam, route53 } from '../../utils/aws.util';
@@ -9,7 +9,7 @@ export const dns = new CommandBuilder()
   .name('install-dns')
   .description('Sets up Route53 binding to cluster')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('name', {
         type: Types.string,
         required: true,

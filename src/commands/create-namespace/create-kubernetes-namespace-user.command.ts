@@ -1,5 +1,5 @@
 import { V1beta1Role, V1beta1RoleBinding, V1DeleteOptions } from '@kubernetes/client-node';
-import { CommandBuilder, Logger, parameters, Types } from '@lpha/core';
+import { CommandBuilder, Logger, ParametersBuilder, Types } from '@lpha/core';
 import * as YAML from 'js-yaml';
 import { k8sApi, k8sRbacApi } from '../../utils/k8s.util';
 
@@ -13,7 +13,7 @@ export const createKubernetesNamespaceUser = new CommandBuilder()
     'New AWS credentials will be generated automatically.'
   )
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('clusterName', {
         type: Types.string,
         required: true,

@@ -1,11 +1,11 @@
-import { CommandBuilder, exec, parameters, Types } from '@lpha/core';
+import { CommandBuilder, exec, ParametersBuilder, Types } from '@lpha/core';
 import { createKeyPair } from '../utility';
 
 export const setupCluster = new CommandBuilder()
   .name('setup-cluster')
   .description('Creates a new Kubernetes cluster on AWS.')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('name', {
         type: Types.string,
         description: 'The name of cluster you\'d like to create.',

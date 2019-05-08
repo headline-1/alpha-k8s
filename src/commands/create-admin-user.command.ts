@@ -1,4 +1,4 @@
-import { CommandBuilder, Logger, parameters, Types } from '@lpha/core';
+import { CommandBuilder, Logger, ParametersBuilder, Types } from '@lpha/core';
 import * as YAML from 'js-yaml';
 import { iam, sts } from '../utils/aws.util';
 import { k8sApi } from '../utils/k8s.util';
@@ -7,7 +7,7 @@ export const createAdminUser = new CommandBuilder()
   .name('create-admin-user')
   .description('Creates a new Kubernetes admin user on AWS.')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('name', {
         type: Types.string,
         description: 'The name of cluster.',

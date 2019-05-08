@@ -295,18 +295,19 @@
               "Resource": "*"
             },
             {
-              "Sid": "RepositoryInfo",
+              "Sid": "RepositoryInfoAndCreation",
               "Effect": "Allow",
               "Action": [
                 "ecr:GetAuthorizationToken",
-                "ecr:DescribeRepositories"
+                "ecr:DescribeRepositories",
+                "ecr:CreateRepository"
               ],
               "Resource": "*"
             },
             {
               "Sid": "RepositoryAllAccess",
               "Effect": "Allow",
-              "Action": "ecr:*",
+              "Action": "*",
               "Resource": {
                 "Fn::Join": [
                   "",

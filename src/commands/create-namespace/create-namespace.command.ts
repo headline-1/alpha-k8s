@@ -1,6 +1,6 @@
 import * as k8s from '@kubernetes/client-node';
 import { V1DeleteOptions } from '@kubernetes/client-node';
-import { CommandBuilder, Logger, makeDirs, parameters, sleep, Types } from '@lpha/core';
+import { CommandBuilder, Logger, makeDir, ParametersBuilder, sleep, Types } from '@lpha/core';
 import { StackStatus } from 'aws-sdk/clients/cloudformation';
 import { cf } from '../../utils/aws.util';
 import { k8sApi } from '../../utils/k8s.util';
@@ -11,7 +11,7 @@ const TAG = 'create-namespace';
 export const createNamespace = new CommandBuilder()
   .name('create-namespace')
   .parameters(
-    parameters()
+    new ParametersBuilder()
       .add('clusterName', {
         type: Types.string,
         required: true,
@@ -31,7 +31,7 @@ export const createNamespace = new CommandBuilder()
       throw new Error(`Namespace name is invalid: ${namespaceName}`);
     }
     const namespacePath = `./namespaces/${namespaceName}`;
-    await makeDirs(namespacePath);
+    await makeDir(namespacePath);
 
     const StackName = `${namespaceName}-namespace`;
     Logger.log(TAG, `Creating AWS CloudFormation Stack "${StackName}"...`);
