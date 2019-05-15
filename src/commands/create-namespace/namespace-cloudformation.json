@@ -312,7 +312,7 @@
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ecr:::repository/",
+                    "arn:aws:ecr:*:*:repository/",
                     {
                       "Ref": "NamespaceName"
                     },
