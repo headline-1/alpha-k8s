@@ -48,13 +48,12 @@ export const createKubernetesNamespaceUser = new CommandBuilder()
       })
       .build()
   )
-  .execute(async ({ clusterName, namespaceName, suffix, rbacRules }, revertStack) => {
+  .execute(async ({ clusterName, namespaceName, suffix, rbacRules, roleArn }, revertStack) => {
     const kubernetesName = `${namespaceName}-${suffix}`;
     const name = `${kubernetesName}-${clusterName}`;
     const kubernetesGroupName = `${kubernetesName}-group`;
     const kubernetesRoleName = `${kubernetesName}-role`;
     const kubernetesRoleBindingName = `${kubernetesName}-role-binding`;
-    const roleArn = `${name}-k8s-role`;
 
     Logger.log(TAG, `Creating ${suffix} user for namespace ${namespaceName}...`);
 

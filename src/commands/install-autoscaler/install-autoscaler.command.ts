@@ -37,7 +37,7 @@ export const installAutoscaler = new CommandBuilder()
 
     Logger.log(TAG, 'Listing IAM roles...');
     const { Roles: iamRoles } = await iam.listRoles().promise();
-    const roles = iamRoles.filter(role => role.RoleName.startsWith(`eksctl-${name}-nodegroup`));
+    const roles = iamRoles.filter(role => role.RoleName.match(new RegExp(`^eksctl-${name}-.+-NodeInstanceRole`)));
     if (roles.length !== 1) {
       throw new Error('Expected to get just one role, got: ' + JSON.stringify(roles));
     }
