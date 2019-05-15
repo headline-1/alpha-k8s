@@ -1,12 +1,13 @@
 {
   "name": "@lpha/plugin-aws-k8s",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Set up a Kubernetes cluster on AWS easily",
   "main": "dist/index.js",
   "author": "Krzysztof Miemiec <krzysztof.miemiec@gmail.com>",
   "license": "MIT",
   "private": false,
   "files": [
+    "docs",
     "dist"
   ],
   "scripts": {
