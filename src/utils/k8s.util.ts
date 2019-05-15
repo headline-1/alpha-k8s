@@ -1,17 +1,17 @@
 import * as k8s from '@kubernetes/client-node';
-import { KubeConfig } from '@kubernetes/client-node';
+import { findHomeDir, KubeConfig } from '@kubernetes/client-node';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as YAML from 'js-yaml';
 import * as path from 'path';
 
-export const kc = new k8s.KubeConfig();
+export const kc = new KubeConfig();
 
 const readDefaultConfigFromFile = (): string | undefined => {
   if (process.env.KUBECONFIG && process.env.KUBECONFIG.length > 0) {
     return fs.readFileSync(process.env.KUBECONFIG, { encoding: 'utf8' });
   }
-  const home = KubeConfig.findHomeDir();
+  const home = findHomeDir();
   if (home) {
     const config = path.join(home, '.kube', 'config');
     if (fs.existsSync(config)) {

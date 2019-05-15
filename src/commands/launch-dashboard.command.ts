@@ -18,7 +18,7 @@ export const launchDashboard = new CommandBuilder()
       .build()
   )
   .execute(async ({ username }) => {
-    let token = kc.getCurrentUser().token;
+    let token = kc.getCurrentUser()!.token;
     if (!token) {
       const { body: { items } } = await k8sApi().listNamespacedSecret('kube-system');
       const item = items.find(item => item.metadata.name.includes(username + '-token-'));

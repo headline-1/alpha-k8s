@@ -75,7 +75,7 @@ export const createKubernetesNamespaceUser = new CommandBuilder()
         `${name}|K8S`,
         `Deleting namespaced role "${kubernetesRoleName}" for namespace "${namespaceName}"...`
       );
-      await k8sRbacApi().deleteNamespacedRole(kubernetesRoleName, namespaceName, {
+      await k8sRbacApi().deleteNamespacedRole(kubernetesRoleName, namespaceName, undefined, {
         propagationPolicy: 'Foreground',
       } as V1DeleteOptions);
     });
@@ -109,7 +109,7 @@ export const createKubernetesNamespaceUser = new CommandBuilder()
         `${name}|K8S`,
         `Deleting namespaced role binding "${kubernetesRoleBindingName}" for namespace "${namespaceName}"...`
       );
-      await k8sRbacApi().deleteNamespacedRoleBinding(kubernetesRoleBindingName, namespaceName, {
+      await k8sRbacApi().deleteNamespacedRoleBinding(kubernetesRoleBindingName, namespaceName, undefined, {
         propagationPolicy: 'Foreground',
       } as V1DeleteOptions);
     });

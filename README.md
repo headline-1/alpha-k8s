@@ -1,7 +1,5 @@
-# alpha-k8s
+# @lpha/plugin-aws-k8s
 Utility that simplifies Kubernetes@AWS cluster management
-
-Currently the code is a huge mess, it may not work under not-exactly-as-on-my-platform conditions.
 
 ### How to cluster
 
